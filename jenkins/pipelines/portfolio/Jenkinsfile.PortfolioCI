@@ -1,0 +1,14 @@
+pipeline {
+    agent {
+        label 'K8S-With-Docker'  // Runs on an agent labeled 'X'
+    }
+    stages {
+        stage('Hello World') {
+            steps {
+                echo 'Hello World'  // Echoes 'Hello World' to console output
+                sh 'whoami'
+                sh 'docker ps'
+            }
+        }
+    }
+}
