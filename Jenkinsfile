@@ -24,7 +24,7 @@ pipeline {
                                 disableAllJobs: env.JOB_NAME.contains('/'),
                                 default_ci_repo: params.default_ci_repo
                             ]
-                    jobDsl(additionalClasspath: 'infrastructure/dsl/pipeline_job',
+                    jobDsl(additionalClasspath: 'src/',
                         lookupStrategy: 'SEED_JOB',                        
                         targets: ['infrastructure/dsl/pipeline_job/DSL*.groovy'].join('\n'),
                         sandbox: true,           
