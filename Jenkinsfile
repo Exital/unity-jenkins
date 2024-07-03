@@ -20,7 +20,9 @@ pipeline {
         stage('Create or Update Jobs and Folders') {
             steps {
                 script {
-                    final Map additionalParams = []
+                    final Map additionalParams = [
+                        testingEnv: env.JOB_NAME.contains('Test'),
+                    ]
                     jobDsl(additionalClasspath: 'src/',
                         lookupStrategy: 'SEED_JOB',                        
                         targets: ['jenkins/dsl/jobs/DSL*.groovy'].join('\n'),
