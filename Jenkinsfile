@@ -25,7 +25,7 @@ pipeline {
                     ]
                     jobDsl(additionalClasspath: 'src/',
                         lookupStrategy: 'SEED_JOB',                        
-                        targets: ['jenkins/dsl/jobs/DSL*.groovy'].join('\n'),
+                        targets: ['jenkins/dsl/jobs/*/DSL*.groovy'].join('\n'),
                         sandbox: true,           
                         removedJobAction: 'DELETE', // Action to take on removed jobs
                         additionalParameters: additionalParams)
