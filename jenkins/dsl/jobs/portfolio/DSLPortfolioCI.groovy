@@ -1,6 +1,6 @@
 import com.utils.CommonSteps
 import com.utils.Constants
-//test 
+
 CommonSteps.createPathFolders(this, Constants.PORTFOLIO_PATH)
 def JOB_NAME = Constants.PORTFOLIO_PATH + "/Portfolio-CI"
 
