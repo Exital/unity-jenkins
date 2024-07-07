@@ -15,8 +15,8 @@ pipelineJob(JOB_NAME){
                       value("\$.ref")
                   }
               }
-              regexpFilterText("\$portfolio_branch")
-              regexpFilterExpression("^(refs\\/heads\\/(master|develop))*?\$")
+              // regexpFilterText("\$portfolio_branch")
+              // regexpFilterExpression("^(refs\\/heads\\/(master|develop))*?\$")
               printContributedVariables(true)
               printPostContent(true)
               tokenCredentialId('tal_webhook')
