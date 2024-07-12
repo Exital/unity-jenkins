@@ -50,13 +50,10 @@ pipeline {
                         def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
                         IMAGE_TAG = "${portfolio_branch}_${commitHash}"
                         
-                        def labels = [
-                            "app.branch=${portfolio_branch}",
-                            "app.commit=${commitHash}"
-                        ]
+                        def docker_build_params = "--label 'app.branch=${portfolio_branch}' --label 'app.commit=${commitHash}'"
 
                         docker.withRegistry("https://${DOCKER_REGISTRY}", 'harbor-credentials') {
-                            def docker_image = docker.build("${DOCKER_REGISTRY}/portfolio/${IMAGE_REPO}:${IMAGE_TAG}", "-f Dockerfile.prod .", labels: labels)
+                            def docker_image = docker.build("${DOCKER_REGISTRY}/portfolio/${IMAGE_REPO}:${IMAGE_TAG}", "${docker_build_params} -f Dockerfile.prod .")
                             docker_image.push()
                             sh "docker rmi ${docker_image.id}"
                         }
