@@ -20,7 +20,7 @@ pipelineJob(JOB_NAME){
                       value("\$.ref")
                   }
               }
-              regexpFilterText("\$portfolio_branch")
+              regexpFilterText("\$full_portfolio_branch")
               regexpFilterExpression("^(refs\\/heads\\/(master|staging))\$")
               printContributedVariables(true)
               printPostContent(true)
