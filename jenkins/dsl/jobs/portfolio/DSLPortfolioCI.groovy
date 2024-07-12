@@ -13,13 +13,14 @@ pipelineJob(JOB_NAME){
                   genericVariable {
                       key("portfolio_branch")
                       value("\$.ref")
+                      valueFilterRegex("^(refs\\/heads\\/)")
                   }
               }
               regexpFilterText("\$portfolio_branch")
-              regexpFilterExpression("^(refs\\/heads\\/(master|develop))*?\$")
+              regexpFilterExpression("^(refs\\/heads\\/(master|staging))\$")
               printContributedVariables(true)
               printPostContent(true)
-              tokenCredentialId('tal_webhook')
+              tokenCredentialId('github-webhook-portfolio-ci')
           }
       }
     }
