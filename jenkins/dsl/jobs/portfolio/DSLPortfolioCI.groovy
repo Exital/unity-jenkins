@@ -26,7 +26,7 @@ pipelineJob(JOB_NAME){
   }
   parameters {
       stringParam('docker_registry', 'harbor.talrozen.com', 'Docker Registry')
-      // stringParam('portfolio_branch', '', 'Portfolio Branch')
+      stringParam('portfolio_branch', '', 'Portfolio Branch')
   }
 
   CommonSteps.applyCpsScm(delegate, Constants.SCM_URL_DSL_REPO, Constants.EXITAL_GITHUB_CREDENTIALS, "main", "jenkins/pipelines/portfolio/Jenkinsfile.PortfolioCI")
