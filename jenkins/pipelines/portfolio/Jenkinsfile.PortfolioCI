@@ -43,25 +43,27 @@ pipeline {
             }
         }
 
-        // stage('Build and Push Docker Image') {
-        //     steps {
-        //         dir('portfolio') {
-        //             script {
-        //                 def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-        //                 IMAGE_TAG = "${portfolio_branch}_${commitHash}"
+        stage('Build and Push Docker Image') {
+            steps {
+                dir('portfolio') {
+                    script {
+                        def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                        IMAGE_TAG = "${portfolio_branch}_${commitHash}"
                         
-        //                 // Build docker arguments
-        //                 def dockerArgs = ""
+                        def labels = [
+                            "app.branch=${portfolio_branch}",
+                            "app.commit=${commitHash}"
+                        ]
 
-        //                 docker.withRegistry("https://${DOCKER_REGISTRY}", 'harbor-cred-secret') {
-        //                     def docker_image = docker.build("${DOCKER_REGISTRY}/portfolio/portfolio-front:${IMAGE_TAG}", "${dockerArgs} -f Dockerfile.portfolio .")
-        //                     docker_image.push()
-        //                     sh "docker rmi ${docker_image.id}"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                        docker.withRegistry("https://${DOCKER_REGISTRY}", 'harbor-credentials') {
+                            def docker_image = docker.build("${DOCKER_REGISTRY}/portfolio/${IMAGE_REPO}:${IMAGE_TAG}", "-f Dockerfile.prod .", labels: labels)
+                            docker_image.push()
+                            sh "docker rmi ${docker_image.id}"
+                        }
+                    }
+                }
+            }
+        }
 
         
         // stage('Update Deployment') {
