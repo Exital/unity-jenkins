@@ -7,6 +7,7 @@ pipeline {
     environment {
         IMAGE_TAG = ''
         IMAGE_REPO = ''
+        HELM_VALUES_FILE = ''
     }
     stages {
         stage('Checkout Source Code') {
@@ -22,8 +23,10 @@ pipeline {
 
                     if (portfolio_branch == 'master') {
                         IMAGE_REPO = 'portfolio-prod'
+                        HELM_VALUES_FILE 'values-prod.yml'
                     } else if (portfolio_branch == 'staging') {
                         IMAGE_REPO = 'portfolio-staging'
+                        HELM_VALUES_FILE = 'values-staging.yml'
                     } else {
                         IMAGE_REPO = 'portfolio-dev'
                     }
@@ -37,7 +40,7 @@ pipeline {
                                 branches: [[name: 'master']],
                                 extensions: [],
                                 submoduleCfg: [],
-                                userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git']]])
+                                userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git', credentialsId: 'github-repo-token']]])
                     }
                 }
             }
@@ -63,32 +66,29 @@ pipeline {
         }
 
         
-        // stage('Update Deployment') {
-        //     steps {
-        //         dir('portfolio-cd') {
-        //             script {            
-        //                 // Define the path to the Deployment YAML file based on the branch/environment
-        //                 def deploymentPath = "environments/${CHECKED_OUT_BRANCH}/deployment.yml"
+        stage('Update GitOps values') {
+            when {
+                expression {
+                    portfolio_branch == 'master' || portfolio_branch == 'staging'
+                }
+            }
+            steps {
+                dir('gitops') {
+                    script {            
+                        // Read the Deployment YAML file
+                        def helm_values = readFile(HELM_VALUES_FILE)
 
-        //                 // Read the Deployment YAML file
-        //                 def deploymentYaml = readFile(deploymentPath)
+                        // Update the image tag in the Deployment YAML
+                        helm_values = helm_values['image']['tag'] = IMAGE_TAG
 
-        //                 // Update the image tag in the Deployment YAML
-        //                 deploymentYaml = deploymentYaml.replaceAll("(?<=image: harbor\\.chay-techs\\.com\\/portfolio\\/portfolio-front:)\\S+", IMAGE_TAG)
+                        // Write the modified Deployment YAML back to the file
+                        writeFile(file: HELM_VALUES_FILE, text: helm_values)
 
-        //                 // Write the modified Deployment YAML back to the file
-        //                 writeFile(file: deploymentPath, text: deploymentYaml)
-
-        //                 withCredentials([usernamePassword(credentialsId: 'github-secret-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-        //                     sh "git config --global user.email ${GIT_MAIL}"
-        //                     sh "git config --global user.name ${GIT_USERNAME}"
-        //                     sh "git add ${deploymentPath}"
-        //                     sh 'git commit -m "Update Docker image tag in deployment.yml"'
-        //                     sh "git push https://$USERNAME:$PASSWORD@github.com/ChayFadida/PortfolioCD.git"
-        //                 }
-        //             }
-        //         }
-        //     }
-        // }
+                        sh "git commit -am 'Update Docker image tag in ${HELM_VALUES_FILE}.yml'"
+                        sh "git push"
+                    }
+                }
+            }
+        }
     }
 }
