@@ -76,13 +76,14 @@ pipeline {
                 dir('gitops') {
                     script {            
                         // Read the Deployment YAML file
-                        def helm_values = readFile(HELM_VALUES_FILE)
+                        def helm_values_path = "portfolio-webapp/${HELM_VALUES_FILE}"
+                        def helm_values = readFile()
 
                         // Update the image tag in the Deployment YAML
                         helm_values = helm_values['image']['tag'] = IMAGE_TAG
 
                         // Write the modified Deployment YAML back to the file
-                        writeFile(file: HELM_VALUES_FILE, text: helm_values)
+                        writeFile(file: helm_values_path, text: helm_values)
 
                         sh "git commit -am 'Update Docker image tag in ${HELM_VALUES_FILE}.yml'"
                         sh "git push"
