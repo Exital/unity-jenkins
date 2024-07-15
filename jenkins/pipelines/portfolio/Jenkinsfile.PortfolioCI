@@ -77,7 +77,7 @@ pipeline {
                     script {            
                         // Read the Deployment YAML file
                         def helm_values_path = "portfolio-webapp/${HELM_VALUES_FILE}"
-                        def helm_values = readFile(helm_values_path)
+                        def helm_values = yeadYaml(helm_values_path)
 
                         // Update the image tag in the Deployment YAML
                         helm_values = helm_values['image']['tag'] = IMAGE_TAG
