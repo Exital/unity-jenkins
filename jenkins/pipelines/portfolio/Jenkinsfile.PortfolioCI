@@ -23,10 +23,10 @@ pipeline {
 
                     if (portfolio_branch == 'master') {
                         IMAGE_REPO = 'portfolio-prod'
-                        HELM_VALUES_FILE = 'values-prod.yml'
+                        HELM_VALUES_FILE = 'values-prod.yaml'
                     } else if (portfolio_branch == 'staging') {
                         IMAGE_REPO = 'portfolio-staging'
-                        HELM_VALUES_FILE = 'values-staging.yml'
+                        HELM_VALUES_FILE = 'values-staging.yaml'
                     } else {
                         IMAGE_REPO = 'portfolio-dev'
                     }
