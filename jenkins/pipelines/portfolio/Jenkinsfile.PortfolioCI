@@ -15,6 +15,7 @@ pipeline {
                 cleanWs()
                 dir('portfolio') {
                     script {
+                        // TODO: update to new syntax
                         checkout([$class: 'GitSCM',
                                 branches: [[name: portfolio_branch]],
                                 extensions: [],
@@ -43,7 +44,7 @@ pipeline {
                         //         userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git']]])
                         // sh "git checkout master"
                     checkout scmGit(branches: [[name: 'master']], 
-                                    extensions: [localBranch('master'), [$class: 'UserIdentity', email: 'talrosen3@gmail.com', name: 'Jenkins CI']], 
+                                    extensions: [localBranch('**'), [$class: 'UserIdentity', email: 'talrosen3@gmail.com', name: 'Jenkins CI']], 
                                     userRemoteConfigs: [[credentialsId: 'github-repo-token', url: 'https://github.com/Exital/portfolioGitOps.git']])
                     }
                 }
@@ -84,10 +85,10 @@ pipeline {
                         def helm_values = readYaml file: helm_values_path
 
                         // Update the image tag in the Deployment YAML
-                        helm_values = helm_values.image.tag = IMAGE_TAG
+                        helm_values.image.tag = IMAGE_TAG
 
                         // Write the modified Deployment YAML back to the file
-                        writeFile(file: helm_values_path, text: helm_values)
+                        writeYaml file: helm_values_path, data: helm_values, overwrite: true
                         sh """
                             git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}.yml"
                             git push
