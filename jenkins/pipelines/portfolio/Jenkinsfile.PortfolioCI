@@ -82,7 +82,7 @@ pipeline {
                             sh """
                                 git config user.email "talrosen3@gmail.com"
                                 git config user.name "Jenkins CI"
-                                git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}.yml"
+                                git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}"
                                 git push
                             """
                         }
