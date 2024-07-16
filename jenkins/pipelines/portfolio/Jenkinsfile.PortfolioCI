@@ -84,7 +84,7 @@ pipeline {
                         def helm_values = readYaml file: helm_values_path
 
                         // Update the image tag in the Deployment YAML
-                        helm_values = helm_values['image']['tag'] = IMAGE_TAG
+                        helm_values = helm_values.image.tag = IMAGE_TAG
 
                         // Write the modified Deployment YAML back to the file
                         writeFile(file: helm_values_path, text: helm_values)
