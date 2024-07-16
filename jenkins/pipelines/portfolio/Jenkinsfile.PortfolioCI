@@ -15,37 +15,25 @@ pipeline {
                 cleanWs()
                 dir('portfolio') {
                     script {
-                        // TODO: update to new syntax
-                        checkout([$class: 'GitSCM',
-                                branches: [[name: portfolio_branch]],
-                                extensions: [],
-                                submoduleCfg: [],
-                                userRemoteConfigs: [[url: 'https://github.com/Exital/portfolio.git']]])
+                        checkout scmGit(branches: [[name: portfolio_branch]], userRemoteConfigs: [[url: 'https://github.com/Exital/portfolio.git']])
 
-                    if (portfolio_branch == 'master') {
-                        IMAGE_REPO = 'portfolio-prod'
-                        HELM_VALUES_FILE = 'values-prod.yaml'
-                    } else if (portfolio_branch == 'staging') {
-                        IMAGE_REPO = 'portfolio-staging'
-                        HELM_VALUES_FILE = 'values-staging.yaml'
-                    } else {
-                        IMAGE_REPO = 'portfolio-dev'
-                    }
-                    echo "Using IMAGE_REPO: ${IMAGE_REPO}"
+                        if (portfolio_branch == 'master') {
+                            IMAGE_REPO = 'portfolio-prod'
+                            HELM_VALUES_FILE = 'values-prod.yaml'
+                        } else if (portfolio_branch == 'staging') {
+                            IMAGE_REPO = 'portfolio-staging'
+                            HELM_VALUES_FILE = 'values-staging.yaml'
+                        } else {
+                            IMAGE_REPO = 'portfolio-dev'
+                        }
+                        echo "Using IMAGE_REPO: ${IMAGE_REPO}"
                     }
                 }
 
                 dir('gitops') {
                     script {
-                        // checkout([$class: 'GitSCM',
-                        //         branches: [[name: 'master']],
-                        //         extensions: [],
-                        //         submoduleCfg: [],
-                        //         userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git']]])
-                        // sh "git checkout master"
-                    checkout scmGit(branches: [[name: 'master']], 
-                                    extensions: [localBranch('**'), [$class: 'UserIdentity', email: 'talrosen3@gmail.com', name: 'Jenkins CI']], 
-                                    userRemoteConfigs: [[credentialsId: 'github-repo-token', url: 'https://github.com/Exital/portfolioGitOps.git']])
+                    checkout scmGit(branches: [[name: 'master']], userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git']])
+                    sh "git checkout master"
                     }
                 }
             }
@@ -79,7 +67,7 @@ pipeline {
             }
             steps {
                 dir('gitops') {
-                    script {            
+                    script {     
                         // Read the Deployment YAML file
                         def helm_values_path = "portfolio-webapp/${HELM_VALUES_FILE}"
                         def helm_values = readYaml file: helm_values_path
@@ -89,10 +77,15 @@ pipeline {
 
                         // Write the modified Deployment YAML back to the file
                         writeYaml file: helm_values_path, data: helm_values, overwrite: true
-                        sh """
-                            git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}.yml"
-                            git push
-                        """
+
+                        withCredentials([gitUsernamePassword(credentialsId: 'github-repo-username-token', gitToolName: 'Default')]) {
+                            sh """
+                                git config user.email "talrosen3@gmail.com"
+                                git config user.name "Jenkins CI"
+                                git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}.yml"
+                                git push
+                            """
+                        }
                     }
                 }
             }
