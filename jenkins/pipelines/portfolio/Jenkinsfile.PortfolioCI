@@ -41,6 +41,7 @@ pipeline {
                                 extensions: [],
                                 submoduleCfg: [],
                                 userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git', credentialsId: 'github-repo-token']]])
+                        sh "git checkout master"
                     }
                 }
             }
