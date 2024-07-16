@@ -44,7 +44,8 @@ pipeline {
                 dir('portfolio') {
                     script {
                         def commitHash = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
-                        IMAGE_TAG = "${portfolio_branch}_${commitHash}"
+                         def sanitizedBranch = portfolio_branch.replaceAll('/', '_')
+                        IMAGE_TAG = "${sanitizedBranch}_${commitHash}"
                         
                         def docker_build_params = "--label 'app.branch=${portfolio_branch}' --label 'app.commit=${commitHash}'"
 
