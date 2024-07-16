@@ -36,12 +36,15 @@ pipeline {
 
                 dir('gitops') {
                     script {
-                        checkout([$class: 'GitSCM',
-                                branches: [[name: 'master']],
-                                extensions: [],
-                                submoduleCfg: [],
-                                userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git']]])
-                        sh "git checkout master"
+                        // checkout([$class: 'GitSCM',
+                        //         branches: [[name: 'master']],
+                        //         extensions: [],
+                        //         submoduleCfg: [],
+                        //         userRemoteConfigs: [[url: 'https://github.com/Exital/portfolioGitOps.git']]])
+                        // sh "git checkout master"
+                    checkout scmGit(branches: [[name: 'master']], 
+                                    extensions: [localBranch('master'), [$class: 'UserIdentity', email: 'talrosen3@gmail.com', name: 'Jenkins CI']], 
+                                    userRemoteConfigs: [[credentialsId: 'github-repo-token', url: 'https://github.com/Exital/portfolioGitOps.git']])
                     }
                 }
             }
@@ -75,25 +78,21 @@ pipeline {
             }
             steps {
                 dir('gitops') {
-                    withCredentials([string(credentialsId: 'github-repo-token', variable: 'GITHUB_TOKEN')]) {
-                        script {            
-                            // Read the Deployment YAML file
-                            def helm_values_path = "portfolio-webapp/${HELM_VALUES_FILE}"
-                            def helm_values = readYaml file: helm_values_path
+                    script {            
+                        // Read the Deployment YAML file
+                        def helm_values_path = "portfolio-webapp/${HELM_VALUES_FILE}"
+                        def helm_values = readYaml file: helm_values_path
 
-                            // Update the image tag in the Deployment YAML
-                            helm_values = helm_values['image']['tag'] = IMAGE_TAG
+                        // Update the image tag in the Deployment YAML
+                        helm_values = helm_values['image']['tag'] = IMAGE_TAG
 
-                            // Write the modified Deployment YAML back to the file
-                            writeFile(file: helm_values_path, text: helm_values)
-                            sh '''
-                                git remote set-url origin https://$GITHUB_TOKEN@github.com/Exital/portfolioGitOps.git
-                                git config user.email 'talrosen3@google.com'
-                                git config user.name 'Jenkins CI'
-                                git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}.yml"
-                                git push origin master
-                            '''
-                        }
+                        // Write the modified Deployment YAML back to the file
+                        writeFile(file: helm_values_path, text: helm_values)
+                        sh """
+                            git commit -am "Update Docker image tag in ${HELM_VALUES_FILE}.yml"
+                            git push
+                        """
+                    }
                     }
                 }
             }
