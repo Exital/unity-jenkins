@@ -85,6 +85,8 @@ pipeline {
                         // Write the modified Deployment YAML back to the file
                         writeFile(file: helm_values_path, text: helm_values)
 
+                        sh "git config user.email 'talrosen3@google.com'"
+                        sh "git config user.name 'Jenkins CI'"
                         sh "git commit -am 'Update Docker image tag in ${HELM_VALUES_FILE}.yml'"
                         sh "git push"
                     }
